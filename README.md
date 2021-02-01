@@ -1,6 +1,18 @@
 # Background-Change
 Change background of image using semantic segmentation
 
+## Running script
+
+### Weights
+
+Download weights from here:
+
+https://drive.google.com/file/d/1VNYZ1X5bnIZFIVIgNi9JwqCNIvioxexe/view?usp=sharing
+
+### Run 
+
+python main.py --image --bg_image --weights --debug --output_dir
+
 
 ### Input 
 
@@ -10,9 +22,7 @@ Change background of image using semantic segmentation
 ## Output
 <img src="https://github.com/theAyushAT/Background-Change/blob/main/demo_images/final1.png" width= "325" height= "487.5">
 
-## Running script
 
-python main.py --image --bg_image --weights --debug --output_dir
 
 
 
