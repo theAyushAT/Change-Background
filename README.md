@@ -6,8 +6,8 @@ Change background of image using semantic segmentation
 python main.py --image --bg_image --weights --debug --output_dir
 
 
-<img src="https://github.com/theAyushAT/Background-Change/blob/main/demo_images/background.jpg" width="179" height="180">
-![plot](https://github.com/theAyushAT/Background-Change/blob/main/demo_images/image1.jpg)
+<img src="https://github.com/theAyushAT/Background-Change/blob/main/demo_images/background.jpg"> <img src= "https://github.com/theAyushAT/Background-Change/blob/main/demo_images/image1.jpg">
+
 ![plot](https://github.com/theAyushAT/Background-Change/blob/main/demo_images/final1.png)
 
 
