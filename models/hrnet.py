@@ -14,7 +14,7 @@ import torch.nn.functional as F
 def hrnet(n_classes):
 
     encoder = HighResolutionNet()
-    decoder = C1(n_classes)
+    decoder = C1_transposed(n_classes)
 
     class model(nn.Module):
         def __init__(self, encoder, decoder):
@@ -348,14 +348,14 @@ class HighResolutionNet(nn.Module):
         self.bn2 = BatchNorm2d(64, momentum=BN_MOMENTUM)
         self.relu = nn.ReLU()
 
-        self.stage1_cfg = { 'NUM_MODULES': 1,'NUM_BRANCHES': 1 ,'BLOCK': Bottleneck , 'NUM_BLOCKS':[1] ,'NUM_CHANNELS':[32] ,'FUSE_METHOD': 'SUM'}
+        self.stage1_cfg = { 'NUM_MODULES': 1,'NUM_BRANCHES': 1 ,'BLOCK': Bottleneck , 'NUM_BLOCKS':[2] ,'NUM_CHANNELS':[64] ,'FUSE_METHOD': 'SUM'}
         num_channels = self.stage1_cfg["NUM_CHANNELS"][0]
         block = self.stage1_cfg["BLOCK"]
         num_blocks = self.stage1_cfg["NUM_BLOCKS"][0]
         self.layer1 = self._make_layer(block, 64, num_channels, num_blocks)
         stage1_out_channel = block.expansion * num_channels
 
-        self.stage2_cfg =  { 'NUM_MODULES': 1,'NUM_BRANCHES': 2,'BLOCK': BasicBlock , 'NUM_BLOCKS':[2,2] ,'NUM_CHANNELS':[16,32] ,'FUSE_METHOD': 'SUM'}
+        self.stage2_cfg =  { 'NUM_MODULES': 1,'NUM_BRANCHES': 2,'BLOCK': BasicBlock , 'NUM_BLOCKS':[2,2] ,'NUM_CHANNELS':[18,36] ,'FUSE_METHOD': 'SUM'}
         num_channels = self.stage2_cfg["NUM_CHANNELS"]
         block = self.stage2_cfg["BLOCK"]
         num_channels = [
@@ -368,7 +368,7 @@ class HighResolutionNet(nn.Module):
             self.stage2_cfg, num_channels
         )
 
-        self.stage3_cfg =  { 'NUM_MODULES': 1,'NUM_BRANCHES': 3,'BLOCK': BasicBlock , 'NUM_BLOCKS':[2,2,2] ,'NUM_CHANNELS':[16,32,64] ,'FUSE_METHOD': 'SUM'}
+        self.stage3_cfg =  { 'NUM_MODULES': 3,'NUM_BRANCHES': 3,'BLOCK': BasicBlock , 'NUM_BLOCKS':[2,2,2] ,'NUM_CHANNELS':[18,36,72] ,'FUSE_METHOD': 'SUM'}
         num_channels = self.stage3_cfg["NUM_CHANNELS"]
         block = self.stage3_cfg["BLOCK"]
         num_channels = [
@@ -380,7 +380,7 @@ class HighResolutionNet(nn.Module):
             self.stage3_cfg, num_channels
         )
 
-        self.stage4_cfg = { 'NUM_MODULES': 1,'NUM_BRANCHES': 4,'BLOCK': BasicBlock , 'NUM_BLOCKS':[2,2,2,2] ,'NUM_CHANNELS':[16,32,64,128] ,'FUSE_METHOD': 'SUM'}
+        self.stage4_cfg = { 'NUM_MODULES': 2,'NUM_BRANCHES': 4,'BLOCK': BasicBlock , 'NUM_BLOCKS':[2,2,2,2] ,'NUM_CHANNELS':[18,36,72,144] ,'FUSE_METHOD': 'SUM'}
         num_channels = self.stage4_cfg["NUM_CHANNELS"]
         block = self.stage4_cfg["BLOCK"]
         num_channels = [
@@ -587,18 +587,24 @@ def conv1x1_bn_relu(in_planes, out_planes, stride=1):
         )
 
 
-class C1(nn.Module):
-    def __init__(self,n_classes, use_softmax=False):
-        super(C1, self).__init__()
+class C1_transposed(nn.Module):
+    def __init__(self, n_classes, use_softmax=False):
+        super(C1_transposed, self).__init__()
         self.use_softmax = use_softmax
-        fc_dim = 240
-        self.cbr = conv1x1_bn_relu(fc_dim, fc_dim, 1)
-        self.conv_last = nn.Conv2d(fc_dim,n_classes, 1, 1, 0)
+        fc_dim = 270
+        self.cbr = nn.Sequential(
+            nn.ConvTranspose2d(fc_dim, fc_dim//2, kernel_size=2, stride=2, padding=0),
+            BatchNorm2d(fc_dim//2, momentum=0.01),
+            nn.ReLU(inplace=False),
+        )
+        self.conv_last = nn.ConvTranspose2d(fc_dim//2, n_classes, 2, 2, 0)
 
     def forward(self, conv_out, segSize=None):
         conv5 = conv_out[-1]
+
         x = self.cbr(conv5)
         x = self.conv_last(x)
+
         if segSize:
             x = F.upsample(x, size=segSize, mode="bilinear")
         if self.use_softmax:  # is True during inference

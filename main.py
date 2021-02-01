@@ -3,10 +3,9 @@ import numpy as np
 from utility import runner
 from PIL import Image
 import os
-from preload import preloader
 import cv2
 import matplotlib.pyplot as plt
-from models import hrnet
+from models.hrnet import hrnet
 import argparse
 
 
@@ -46,11 +45,11 @@ def process():
 
 
 
-    # parser.add_argument(
-    #     "--is_video",
-    #     action="store_true",
-    #     help="If true path to image will be video ",
-    # )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help=" ",
+    )
 
     args = parser.parse_args()
 
@@ -60,41 +59,58 @@ def process():
 
     bg = Image.open(args.bg_image)
     bg = np.array(bg)
-    w, h, _ = person.shape
-    # print(person.shape)
+    w, h, _ = image.shape      
+    # print(image.shape)
     ww, hh, cc = bg.shape
     # print(bg.shape)
-    if ww < w and hh < h:
+    if ww < w or hh < h:
         bg = cv2.resize(bg, (h, w))
-        ww, hh, cc = bg.shape
-        
-        
-    model = hrnet()
+        # print(bg.shape)
+    
+    model = hrnet(2)
     model.load_state_dict(
-        torch.load(seg_weights, map_location=torch.device("cpu"))["state_dict"]
+        torch.load(args.weights, map_location=torch.device("cpu"))["state_dict"]
     )
     model.eval()
 
+    if args.debug:
+        plt.imshow(image)
+        plt.show()
+        
     with torch.no_grad():
-
-        ori_image = np.zeros_like(bg)
-
-        yy = (ww - w) // 2
-        xx = (hh - h) // 2
-
-        ori_image[xx : xx + w, yy : yy + h, :] = image
+        
+        if not ww < w or hh < h:
+            yy = ww - w
+            xx = hh - h
+            yy = int((abs(yy)+yy)/2)
+            xx = int((abs(xx)+xx)/2)
+            ori_image = np.pad(image, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
+                    constant_values= 0 ) 
+        else:
+            ori_image = image.copy()
+        # print(ori_image.shape)
+        # print(image.shape)
+        # ori_image[xx : xx + w, yy : yy + h, :] = image
 
 
         prediction = runner(person, model)
         prediction = Image.fromarray(prediction)
-        seg = np.zeros((ww, hh, 3))
+        if args.debug:
+            plt.imshow(prediction)
+            plt.show()
+        seg = np.zeros_like(image)
+        seg[:,:,0] = prediction
 
-        seg[xx : xx + w, yy : yy + h, 0] = prediction
-        seg[xx : xx + w, yy : yy + h, 1] = prediction
-        seg[xx : xx + w, yy : yy + h, 2] = prediction
+        seg[:,:,1] = prediction
+        seg[:,:,2] = prediction 
+        
+        if not ww < w or hh < h:
+                seg = np.pad(seg, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
+                    constant_values= 0 ) 
 
+        # print(seg.shape)
         result = np.where(seg, ori_image, bg)
-        if debug:
+        if args.debug:
             plt.imshow(result)
             plt.show()
         final_image = Image.fromarray(result, "RGB")
@@ -102,7 +118,6 @@ def process():
 
         final_image.save(f"{args.output_dir}/final.png")  # for Separate Use
 
-    return img
 
 
 
