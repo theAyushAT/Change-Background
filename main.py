@@ -79,15 +79,14 @@ def process():
         
     with torch.no_grad():
         
-        if not ww < w or hh < h:
-            yy = ww - w
-            xx = hh - h
-            yy = int((abs(yy)+yy)/2)
-            xx = int((abs(xx)+xx)/2)
-            ori_image = np.pad(image, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
-                    constant_values= 0 ) 
-        else:
-            ori_image = image.copy()
+
+        yy = ww - w
+        xx = hh - h
+        yy = int((abs(yy)+yy)/2)
+        xx = int((abs(xx)+xx)/2)
+        ori_image = np.pad(image, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
+                constant_values= 0 ) 
+
         # print(ori_image.shape)
         # print(image.shape)
         # ori_image[xx : xx + w, yy : yy + h, :] = image
@@ -104,9 +103,8 @@ def process():
         seg[:,:,1] = prediction
         seg[:,:,2] = prediction 
         
-        if not ww < w or hh < h:
-                seg = np.pad(seg, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
-                    constant_values= 0 ) 
+        seg = np.pad(seg, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
+            constant_values= 0 ) 
 
         # print(seg.shape)
         result = np.where(seg, ori_image, bg)
