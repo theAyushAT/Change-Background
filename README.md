@@ -1,7 +1,21 @@
-# Background-Change
+# Change-Background
 Change background of image using semantic segmentation
 
+<<<<<<< HEAD
 [Click ](http://getplates.ml/backround-replacer) and change your background now
+=======
+## Running script
+
+### Weights
+
+Download weights from here:
+
+https://drive.google.com/file/d/1VNYZ1X5bnIZFIVIgNi9JwqCNIvioxexe/view?usp=sharing
+
+### Run 
+
+python main.py --image --bg_image --weights --debug --output_dir
+>>>>>>> 576222c633e65232cc1cac85e1dffab49c2eb590
 
 
 ### Input 
@@ -12,9 +26,7 @@ Change background of image using semantic segmentation
 ## Output
 <img src="https://github.com/theAyushAT/Background-Change/blob/main/demo_images/final1.png" width= "325" height= "487.5">
 
-## Running script
 
-python main.py --image --bg_image --weights --debug --output_dir
 
 ### Example
 
