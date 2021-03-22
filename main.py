@@ -9,7 +9,7 @@ from models.hrnet import hrnet
 import argparse
 
 
-def process():
+def main():
     
     parser = argparse.ArgumentParser()
 
@@ -53,32 +53,37 @@ def process():
 
     args = parser.parse_args()
 
-    person = Image.open(args.image)
+    person = Image.open(args.image) # reads person image
     person = np.array(person)
     image = person.copy()
 
-    bg = Image.open(args.bg_image)
+    bg = Image.open(args.bg_image) # reads background image
     bg = np.array(bg)
     w, h, _ = image.shape      
-    # print(image.shape)
+
     ww, hh, cc = bg.shape
-    # print(bg.shape)
+
+    # comparison between size
     if ww < w or hh < h:
-        bg = cv2.resize(bg, (h, w))
-        # print(bg.shape)
-    
+        bg = cv2.resize(bg, (h, w)) # if size of background < size of person image
+        #bg is resized to person image
+
+    #mocel is created
     model = hrnet(2)
     model.load_state_dict(
         torch.load(args.weights, map_location=torch.device("cpu"))["state_dict"]
-    )
+    ) # model is loaded
     model.eval()
 
+    # for debugging shows images
     if args.debug:
         plt.imshow(image)
         plt.show()
+        plt.imshow(bg)
+        plt.show()
+    with torch.no_grad(): # gradients are off
         
-    with torch.no_grad():
-        
+        #padding of image of person , so that both background image and person image are same
 
         yy = ww - w
         xx = hh - h
@@ -87,16 +92,14 @@ def process():
         ori_image = np.pad(image, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
                 constant_values= 0 ) 
 
-        # print(ori_image.shape)
-        # print(image.shape)
-        # ori_image[xx : xx + w, yy : yy + h, :] = image
 
-
-        prediction = runner(person, model)
-        prediction = Image.fromarray(prediction)
+        prediction = runner(person, model) # output from semantic segmentation model
+        prediction = Image.fromarray(prediction) # from numpy convert to PIL format
+        
         if args.debug:
             plt.imshow(prediction)
             plt.show()
+        # prediction is converted to 3D array
         seg = np.zeros_like(image)
         seg[:,:,0] = prediction
 
@@ -106,8 +109,7 @@ def process():
         seg = np.pad(seg, ((yy//2 , yy - yy//2),(xx//2,xx - xx//2),(0,0)), 'constant',  
             constant_values= 0 ) 
 
-        # print(seg.shape)
-        result = np.where(seg, ori_image, bg)
+        result = np.where(seg, ori_image, bg) # array is made by keeping person image pixel where person is present else background image pixels 
         if args.debug:
             plt.imshow(result)
             plt.show()
@@ -120,4 +122,4 @@ def process():
 
 
 if __name__ == "__main__":
-    process()
+    main()
