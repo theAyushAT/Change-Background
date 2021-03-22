@@ -1,7 +1,8 @@
+
 # Change-Background
 Change background of image using semantic segmentation
 
-<<<<<<< HEAD
+
 [Click ](http://getplates.ml/backround-replacer) and change your background now
 =======
 ## Running script
@@ -15,7 +16,7 @@ https://drive.google.com/file/d/1VNYZ1X5bnIZFIVIgNi9JwqCNIvioxexe/view?usp=shari
 ### Run 
 
 python main.py --image --bg_image --weights --debug --output_dir
->>>>>>> 576222c633e65232cc1cac85e1dffab49c2eb590
+
 
 
 ### Input 
