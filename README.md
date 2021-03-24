@@ -5,7 +5,7 @@ Change background of image using semantic segmentation
 
 
 [Click ](http://getplates.ml/backround-replacer) and change your background now
-=======
+
 ## Running script
 
 ### Weights
