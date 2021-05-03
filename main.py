@@ -61,8 +61,15 @@ def main():
     bg = np.array(bg)
     w, h, _ = image.shape      
 
-    ww, hh, cc = bg.shape
+    ww, hh, _ = bg.shape
 
+    # for debugging shows images
+    if args.debug:
+        plt.imshow(image)
+        plt.show()
+        plt.imshow(bg)
+        plt.show()
+        
     # comparison between size
     if ww < w or hh < h:
         bg = cv2.resize(bg, (h, w)) # if size of background < size of person image
@@ -75,12 +82,6 @@ def main():
     ) # model is loaded
     model.eval()
 
-    # for debugging shows images
-    if args.debug:
-        plt.imshow(image)
-        plt.show()
-        plt.imshow(bg)
-        plt.show()
     with torch.no_grad(): # gradients are off
         
         #padding of image of person , so that both background image and person image are same

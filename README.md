@@ -32,7 +32,7 @@ python main.py --image --bg_image --weights --debug --output_dir
 
 ### Example
 
-python main.py --image demo_images/image1.jpg --bg_image demo_images/background.jpg --weights hrnetv2_hrnet18_person_dataset_120.pth --debug
+python main.py --image demo_images/image1.jpg --bg_image demo_images/background.jpg --weights weights/hrnetv2_hrnet18_person_dataset_120.pth --debug
 
 
 

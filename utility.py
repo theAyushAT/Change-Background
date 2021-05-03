@@ -21,14 +21,13 @@ def preprocess_image(image):
 
 
 def runner(frame, model):
-
-    current_path = os.path.dirname(os.path.abspath(__file__))
-
     w, h, _ = frame.shape
     import matplotlib.pyplot as plt
 
+    #images is preprocessed
     image = preprocess_image(frame)
 
+    # prediction is given by model
     with torch.no_grad():
         prediction = model(image, (w, h))
 
@@ -39,6 +38,7 @@ def runner(frame, model):
         .numpy()
         .astype(np.uint8)
     )
+
     # print(prediction.shape)
     # print(w,h)
     # plt.imshow(prediction)
